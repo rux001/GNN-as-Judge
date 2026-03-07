@@ -1,0 +1,49 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Datasets (too large for git)
+datasets/*.pt
+datasets/splits/
+!datasets/.gitkeep
+
+# Results and outputs
+results/GNN/*.pt
+results/GNN/*.csv
+results/gnn_as_judge/
+!results/.gitkeep
+
+# Logs
+*.log
+wandb/
+
+# Environment
+*.yml
+!environment.yml
+.env
+.env.local
+config.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# LLaMA-Factory generated data
+LLaMA-Factory/data/*.json
+!LLaMA-Factory/data/dataset_info.json
+!LLaMA-Factory/data/alpaca_en_demo.json
+LLaMA-Factory/wandb/
+LLaMA-Factory/output/
+
+# OGB downloaded datasets
+GNN/dataset/
