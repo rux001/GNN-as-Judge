@@ -9,8 +9,6 @@ Large Language Models (LLMs) have shown strong performance on text-attributed gr
   <img src="gnn_as_judge_pipeline.png" alt="GNN-as-Judge Pipeline" width="100%">
 </p>
 
-The framework operates in three main phases: (1) **Influence-Guided Node Selection** identifies the most informative unlabeled nodes from the input graph; (2) **Pseudo Label Selection** leverages both LLM and GNN predictions to split selected nodes into an agreement set (where both models concur) and a disagreement set (where they differ, filtered by GNN confidence); (3) **Weakly-Supervised Fine-Tuning** uses the agreement set for instruction tuning and the disagreement set for preference tuning, where the GNN acts as a judge to determine the preferred label.
-
 ## Project Structure
 
 ```
@@ -71,21 +69,13 @@ datasets/
 ├── citeseer.pt
 ├── pubmed.pt
 └── arxiv.pt
-```
-
-Each `.pt` file is a PyTorch Geometric `Data` object containing:
-- `x`: Node feature matrix
-- `y`: Node labels
-- `edge_index`: Graph edges
-- `train_mask`, `val_mask`, `test_mask`: Data split masks
-- `raw_texts`: Raw text associated with each node
-- `label_name`: List of class label names
+``
 
 ## Quick Start
 
 ### Step 1: Train a GNN
 
-First, train a GNN model that will serve as the judge. We set the learning rate to 1e-2 and train for up to 200 epochs with a patience of 100 for early stopping. For optimization, we use the Adam optimizer with a weight decay of 5e-4.
+First, train a GNN model that will serve as the judge. 
 
 ```bash
 cd GNN
@@ -112,58 +102,6 @@ Run the pipeline:
 ```bash
 ./pipeline.sh cora 3 42
 ```
-
-This runs all 7 stages: SFT data creation, SFT training, node selection, LLM inference, GNN-as-Judge DPO data creation, DPO training, and final evaluation.
-
-### Running Individual Stages
-
-You can also run each stage separately:
-
-**Create SFT dataset:**
-```bash
-python create_sft.py --dataset cora --output LLaMA-Factory/data/cora_sft.json --shots 3 --seed 42
-```
-
-**Select influential nodes:**
-```bash
-python select_influential_nodes.py --dataset cora --k 1500 --output_file results/selected_nodes.json --shots 3 --seed 42
-```
-
-**Create DPO dataset with GNN-as-Judge:**
-```bash
-python create_wsft.py \
-  --dataset cora \
-  --selected_nodes_path results/selected_nodes.json \
-  --pretrained_model results/GNN/cora_3_shot_best_model_run0.pt \
-  --llm_predictions results/llm_preds.jsonl \
-  --dpo_output_path LLaMA-Factory/data/cora_dpo.json \
-  --sft_output_path LLaMA-Factory/data/cora_dpo_sft.json \
-  --confidence_threshold 0.7 \
-  --shots 3
-```
-
-**Evaluate predictions:**
-```bash
-python evaluate_predictions.py --dataset cora --pred_file results/predictions.jsonl --output_dir results/eval
-```
-
-## Supported Datasets
-
-| Dataset   | Nodes   | Edges     | Classes | Task                     |
-|-----------|---------|-----------|---------|--------------------------|
-| Cora      | 2,708   | 10,556    | 7       | Paper classification     |
-| CiteSeer  | 3,327   | 9,104     | 6       | Paper classification     |
-| PubMed    | 19,717  | 88,648    | 3       | Paper classification     |
-| ogbn-arxiv| 169,343 | 1,166,243 | 40      | Paper classification     |
-
-## Supported GNN Architectures
-
-- **GCN** (Graph Convolutional Network)
-- **GAT** (Graph Attention Network)
-- **SAGE** (GraphSAGE)
-- **SGConv** (Simplified Graph Convolution)
-- **HeteroGNN** (H2GCN for heterophilic graphs)
-
 ## Configuration
 
 See `config_example.sh` for all configurable parameters including:
@@ -184,14 +122,3 @@ This project builds upon the following work:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Citation
-
-If you find this work useful, please cite:
-
-```bibtex
-@article{gnn_as_judge,
-  title={GNN-as-Judge: Unleashing the Power of LLMs for Graph Few-shot Semi-supervised Learning with GNN Feedback},
-  author={},
-  year={2025}
-}
-```
